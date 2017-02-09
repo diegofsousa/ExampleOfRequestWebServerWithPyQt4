@@ -6,6 +6,8 @@ from PyQt4.QtGui import *
 from threading import Thread, current_thread
 from requisicao import Th
 
+
+#modificação
 class interface(QDialog):
 	"""docstring for interface"""
 	def __init__(self, parent=None):
