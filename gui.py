@@ -4,23 +4,22 @@ import sys, os, subprocess
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from threading import Thread, current_thread
-from requisicao import Th
+from requisicao import Th, Interruptor
 
-
-#modificação
 class interface(QDialog):
-	"""docstring for interface"""
+	"""Interface gráfica para melhor usabilidade da aplicação"""
 	def __init__(self, parent=None):
 		super(interface, self).__init__(parent)	
 		self.setWindowTitle('Interruptor remoto DjArduino')
-		label = QLabel("Estado de conexao: ATIVO")
-		label.setAlignment(Qt.AlignCenter)
+		self.label = QLabel("Estado de conexao: Desativado")
+		self.label.setAlignment(Qt.AlignCenter)
 		self.lbl_imagem = QLabel(self)
-		self.
-		#self.lbl_imagem.setPixmap(QPixmap('imagens/lampada.png').scaled(QSize(200,250)))
-		#self.lbl_imagem.setAlignment(Qt.AlignCenter)
 
-		th = Th(self.lbl_imagem)
+
+		th = Th()
+		self.connect(th, SIGNAL("up()"), self.up)
+		self.connect(th, SIGNAL("down()"), self.down)
+		self.connect(th, SIGNAL("wait()"), self.wait)
 		th.start()
 
 		up_button = QPushButton("Ligar")
@@ -31,22 +30,42 @@ class interface(QDialog):
 		hbox.addWidget(down_button)
 
 		vbox = QVBoxLayout(self)
-		vbox.addWidget(label)
+		vbox.addWidget(self.label)
 		vbox.addWidget(self.lbl_imagem)
 		vbox.addLayout(hbox)
 
 
+		
+		
+		self.instanciaInt = Interruptor()
+
+		self.connect(down_button, SIGNAL("clicked()"), self.desliga)
+		self.connect(up_button, SIGNAL("clicked()"), self.liga)
+
 		self.setLayout(vbox)
-
-		self.connect(down_button, SIGNAL("clicked()"), self.down)
-		self.connect(up_button, SIGNAL("clicked()"), self.up)
-
 		self.setGeometry(500,500, 430,130)
 
 	def down(self):
 		self.lbl_imagem.setPixmap(QPixmap('imagens/lampadaapagada.png').scaled(QSize(200,250)))
+		self.lbl_imagem.setAlignment(Qt.AlignCenter)
+
 	def up(self):
 		self.lbl_imagem.setPixmap(QPixmap('imagens/lampada.png').scaled(QSize(200,250)))
+		self.lbl_imagem.setAlignment(Qt.AlignCenter)
+
+	def wait(self):
+		self.label.setText("Estado de conexao: CONECTADO")
+		self.label.setAlignment(Qt.AlignCenter)
+
+	def liga(self):
+		self.lbl_imagem.setText("Aguarde...")
+		print("ligou")
+		self.instanciaInt.liga()
+
+	def desliga(self):
+		self.lbl_imagem.setText("Aguarde...")
+		print("desligou")
+		self.instanciaInt.desliga()
 
 app = QApplication(sys.argv)
 dlg = interface()
